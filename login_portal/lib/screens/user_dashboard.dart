@@ -20,26 +20,21 @@ class UserDashboard extends StatefulWidget {
 }
 
 class _UserDashboardState extends State<UserDashboard> {
-  // --- Firebase Instances ---
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
   final _imagePicker = ImagePicker();
 
-  // --- Cloudinary Configuration ---
   final String _cloudName = "dqeptzlsb";
   final String _uploadPreset = "flutter_mediq_upload";
 
-  // --- Default Profile Image (User) ---
   static const String _defaultProfileImageUrl =
-      'https://res.cloudinary.com/dqeptzlsb/image/upload/v1776579551/user-default_abc123.jpg'; // replace with actual user default
+      'https://res.cloudinary.com/dqeptzlsb/image/upload/v1782734371/default_il19eg.png';
 
-  // --- Controllers for Form Fields ---
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _nicController = TextEditingController();
   final TextEditingController _mobileController = TextEditingController();
 
-  // --- State Variables ---
   bool _loading = true;
   bool _saving = false;
   String? _error;
@@ -47,13 +42,11 @@ class _UserDashboardState extends State<UserDashboard> {
   DateTime? _createdAt;
   String _role = '';
 
-  // Auth state management
   User? _currentUser;
   late StreamSubscription<User?> _authStateSubscription;
   bool _showEmailChangePopup = false;
   bool _showVerificationSuccessPopup = false;
 
-  // Image handling
   XFile? _pickedImageFile;
   bool _uploadingImage = false;
   bool _hasUnsavedChanges = false;
@@ -75,7 +68,7 @@ class _UserDashboardState extends State<UserDashboard> {
     super.dispose();
   }
 
-  // --- Initialization Methods ---
+
   void _initializeAuthListener() {
     _authStateSubscription = _auth.authStateChanges().listen((user) {
       if (user != null) {
@@ -106,7 +99,7 @@ class _UserDashboardState extends State<UserDashboard> {
     }
   }
 
-  // --- Data Loading Methods ---
+
   Future<void> _loadUserProfile() async {
     setState(() {
       _loading = true;
@@ -149,11 +142,10 @@ class _UserDashboardState extends State<UserDashboard> {
   Future<void> _updateLocalStateFromDocument(DocumentSnapshot doc) async {
     final data = doc.data()! as Map<String, dynamic>;
 
-    _fullNameController.text = (data['fullName'] ?? '') as String;
-    _emailController.text =
-        (_currentUser?.email ?? data['email'] ?? '') as String;
+    _fullNameController.text = (data['name'] ?? '') as String;
+    _emailController.text = (_currentUser?.email ?? data['email'] ?? '') as String;
     _nicController.text = (data['nic'] ?? '') as String;
-    _mobileController.text = (data['mobileNumber'] ?? '') as String;
+    _mobileController.text = (data['mobile'] ?? '') as String;
 
     final imageUrl = (data['profileImageUrl'] ?? '') as String?;
     _profileImageUrl = (imageUrl != null && imageUrl.isNotEmpty)
@@ -187,7 +179,6 @@ class _UserDashboardState extends State<UserDashboard> {
     }
   }
 
-  // 🌟 HEADER - with logout button
   Widget _buildDashboardHeader() {
     return Container(
       padding: const EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 20),
@@ -236,7 +227,7 @@ class _UserDashboardState extends State<UserDashboard> {
                   ),
                   const SizedBox(height: 4),
                   const Text(
-                    'Logged in as: User',
+                    'Logged in as: User',   // 👈 changed
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.white70,
@@ -250,7 +241,7 @@ class _UserDashboardState extends State<UserDashboard> {
           ),
           const SizedBox(height: 20),
           const Text(
-            'User Dashboard',
+            'User Profile',     
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -274,7 +265,6 @@ class _UserDashboardState extends State<UserDashboard> {
     );
   }
 
-  // --- Image Handling Methods (no crop) ---
   void _openImageOptions() {
     if (_isVerificationPending) return;
 
@@ -351,8 +341,7 @@ class _UserDashboardState extends State<UserDashboard> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Remove Profile Photo'),
-        content:
-            const Text('Are you sure you want to remove your profile photo?'),
+        content: const Text('Are you sure you want to remove your profile photo?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -397,7 +386,6 @@ class _UserDashboardState extends State<UserDashboard> {
     }
   }
 
-  // --- Cloudinary Upload Method ---
   Future<String?> _uploadImageToCloudinary(XFile imageFile) async {
     try {
       final bytes = await imageFile.readAsBytes();
@@ -438,7 +426,6 @@ class _UserDashboardState extends State<UserDashboard> {
     }
   }
 
-  // --- Profile Save Logic ---
   Future<void> _saveProfile() async {
     final user = _auth.currentUser;
     if (user == null) {
@@ -481,15 +468,13 @@ class _UserDashboardState extends State<UserDashboard> {
       }
 
       final updateData = <String, dynamic>{
-        'fullName': fullName,
+        'name': fullName,
         'email': newEmail,
         'nic': nic,
-        'mobileNumber': mobile,
+        'mobile': mobile,
         'updatedAt': FieldValue.serverTimestamp(),
+        'profileImageUrl': finalProfileImageUrl ?? _defaultProfileImageUrl,
       };
-
-      updateData['profileImageUrl'] =
-          finalProfileImageUrl ?? _defaultProfileImageUrl;
 
       await _firestore.collection('users').doc(user.uid).update(updateData);
 
@@ -534,7 +519,6 @@ class _UserDashboardState extends State<UserDashboard> {
     }
   }
 
-  // --- Email Verification Methods ---
   Future<void> _resendVerificationEmail() async {
     final user = _auth.currentUser;
     if (user == null) return;
@@ -546,7 +530,6 @@ class _UserDashboardState extends State<UserDashboard> {
     }
   }
 
-  // --- UI Helper Methods ---
   Widget _buildEmailChangePopup() {
     if (!_showEmailChangePopup) return const SizedBox.shrink();
 
@@ -687,7 +670,6 @@ class _UserDashboardState extends State<UserDashboard> {
     );
   }
 
-  // ✅ Text field builder
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -814,7 +796,6 @@ class _UserDashboardState extends State<UserDashboard> {
     );
   }
 
-  // --- Image Preview Widget ---
   Widget _buildImagePreview() {
     return GestureDetector(
       onTap: _isVerificationPending ? null : _openImageOptions,
@@ -915,7 +896,6 @@ class _UserDashboardState extends State<UserDashboard> {
     );
   }
 
-  // --- Helper Methods ---
   ImageProvider? _getProfileImage() {
     if (_pickedImageFile != null) {
       return FileImage(File(_pickedImageFile!.path));
@@ -955,7 +935,6 @@ class _UserDashboardState extends State<UserDashboard> {
     return DateFormat('yyyy-MM-dd • hh:mm a').format(_createdAt!);
   }
 
-  // --- Computed Properties ---
   bool get _isVerificationPending =>
       _currentUser?.emailVerified == false && _currentUser != null;
   bool get _hasExistingImage =>
@@ -1049,13 +1028,6 @@ class _UserDashboardState extends State<UserDashboard> {
                                 const SizedBox(height: 18),
                                 Padding(
                                   padding: const EdgeInsets.only(left: 6.0),
-                                  child: Text(
-                                    'Account Created: ${_formatCreatedAt()}',
-                                    style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.black),
-                                  ),
                                 ),
                                 const SizedBox(height: 30),
                                 if (_error != null)
