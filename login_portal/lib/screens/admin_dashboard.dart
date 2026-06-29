@@ -20,26 +20,21 @@ class AdminDashboard extends StatefulWidget {
 }
 
 class _AdminDashboardState extends State<AdminDashboard> {
-  // --- Firebase Instances ---
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
   final _imagePicker = ImagePicker();
 
-  // --- Cloudinary Configuration ---
   final String _cloudName = "dqeptzlsb";
   final String _uploadPreset = "flutter_mediq_upload";
 
-  // --- Default Profile Image (Admin) ---
   static const String _defaultProfileImageUrl =
-      'https://res.cloudinary.com/dqeptzlsb/image/upload/v1776579551/admin-default_rloii1.jpg';
+      'https://res.cloudinary.com/dqeptzlsb/image/upload/v1782734333/default_ioe46y.png';
 
-  // --- Controllers for Form Fields ---
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _nicController = TextEditingController();
   final TextEditingController _mobileController = TextEditingController();
 
-  // --- State Variables ---
   bool _loading = true;
   bool _saving = false;
   String? _error;
@@ -47,13 +42,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
   DateTime? _createdAt;
   String _role = '';
 
-  // Auth state management
   User? _currentUser;
   late StreamSubscription<User?> _authStateSubscription;
   bool _showEmailChangePopup = false;
   bool _showVerificationSuccessPopup = false;
 
-  // Image handling
   XFile? _pickedImageFile;
   bool _uploadingImage = false;
   bool _hasUnsavedChanges = false;
@@ -75,7 +68,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
     super.dispose();
   }
 
-  // --- Initialization Methods ---
   void _initializeAuthListener() {
     _authStateSubscription = _auth.authStateChanges().listen((user) {
       if (user != null) {
@@ -98,10 +90,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
     });
 
     if (justVerified) {
+
       setState(() => _showVerificationSuccessPopup = true);
       Future.delayed(const Duration(seconds: 4), () {
         if (mounted) setState(() => _showVerificationSuccessPopup = false);
       });
+  
       _loadUserProfile();
     }
   }
@@ -146,7 +140,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
     }
   }
 
-  // ✅ FIXED: using 'name' and 'mobile' (not 'fullName' or 'mobileNumber')
   Future<void> _updateLocalStateFromDocument(DocumentSnapshot doc) async {
     final data = doc.data()! as Map<String, dynamic>;
 
@@ -187,7 +180,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
     }
   }
 
-  // 🌟 HEADER - with logout button
   Widget _buildDashboardHeader() {
     return Container(
       padding: const EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 20),
@@ -250,7 +242,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
           const SizedBox(height: 20),
           const Text(
-            'Admin Dashboard',
+            'Admin Profile Manage',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -274,7 +266,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  // --- Image Handling Methods (no crop) ---
   void _openImageOptions() {
     if (_isVerificationPending) return;
 
@@ -351,8 +342,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Remove Profile Photo'),
-        content:
-            const Text('Are you sure you want to remove your profile photo?'),
+        content: const Text('Are you sure you want to remove your profile photo?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -397,7 +387,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     }
   }
 
-  // --- Cloudinary Upload Method ---
+  // --- Cloudinary Upload ---
   Future<String?> _uploadImageToCloudinary(XFile imageFile) async {
     try {
       final bytes = await imageFile.readAsBytes();
@@ -438,7 +428,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     }
   }
 
-  // --- Profile Save Logic (with correct field names) ---
+
   Future<void> _saveProfile() async {
     final user = _auth.currentUser;
     if (user == null) {
@@ -480,7 +470,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
         }
       }
 
-      // ✅ FIXED: using 'name' and 'mobile' (not 'fullName' or 'mobileNumber')
       final updateData = <String, dynamic>{
         'name': fullName,
         'email': newEmail,
@@ -533,7 +522,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     }
   }
 
-  // --- Email Verification Methods ---
+  // --- Email Verification ---
   Future<void> _resendVerificationEmail() async {
     final user = _auth.currentUser;
     if (user == null) return;
@@ -545,7 +534,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     }
   }
 
-  // --- UI Helper Methods ---
+  // --- UI Popups ---
   Widget _buildEmailChangePopup() {
     if (!_showEmailChangePopup) return const SizedBox.shrink();
 
@@ -686,7 +675,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  // ✅ Text field builder
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -813,7 +801,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  // --- Image Preview Widget ---
   Widget _buildImagePreview() {
     return GestureDetector(
       onTap: _isVerificationPending ? null : _openImageOptions,
@@ -914,7 +901,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  // --- Helper Methods ---
+
   ImageProvider? _getProfileImage() {
     if (_pickedImageFile != null) {
       return FileImage(File(_pickedImageFile!.path));
@@ -954,7 +941,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return DateFormat('yyyy-MM-dd • hh:mm a').format(_createdAt!);
   }
 
-  // --- Computed Properties ---
   bool get _isVerificationPending =>
       _currentUser?.emailVerified == false && _currentUser != null;
   bool get _hasExistingImage =>
@@ -1048,7 +1034,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                 const SizedBox(height: 18),
                                 Padding(
                                   padding: const EdgeInsets.only(left: 6.0),
-                                
+                                 
                                 ),
                                 const SizedBox(height: 30),
                                 if (_error != null)
