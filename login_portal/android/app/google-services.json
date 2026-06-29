@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "890167664943",
+    "project_id": "authflow-o64yi",
+    "storage_bucket": "authflow-o64yi.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:890167664943:android:eeec7f3a795f32ec1e01da",
+        "android_client_info": {
+          "package_name": "com.example.login_portal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCniHNMTBwHIGte6ybDd1v0iqwjqlVqrG8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
